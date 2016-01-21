@@ -1,3 +1,3 @@
 # geopoints-datastructure-tester
 
-Program to test which data structure is more time-effective
+Program to test data structures aiming on time and memory effectiveness

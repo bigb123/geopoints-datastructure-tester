@@ -2,6 +2,7 @@ from math import sqrt, pow
 import random
 from time import time
 import psycopg2
+from memory_profiler import memory_usage
 
 from geopoint import Geopoint
 
@@ -49,7 +50,6 @@ def batch_create(point_list):
 
 
 def list_search(lat, lon, point_list):
-    # print('List-based searching:')
     id_list = []
 
     curtime = time()
@@ -63,7 +63,6 @@ def list_search(lat, lon, point_list):
 
 
 def class_search(lat, lon, point_list):
-    # print('\nClass-based searching:')
     id_list = []
 
     """ Insert into class """
@@ -81,7 +80,6 @@ def class_search(lat, lon, point_list):
 
 
 def dict_search(lat, lon, point_list):
-    # print('\nDictionary searching:')
     id_list = []
 
     """ Insert into dictionary"""
@@ -102,8 +100,6 @@ def dict_search(lat, lon, point_list):
 
 
 def database_search(lat, lon, point_list):
-    # print('\nDatabase searching:')
-
     try:
         conn = psycopg2.connect('host=192.168.0.16 user=pgwojtek dbname=cctest password=cctestpasswd0%0')
     except:
@@ -152,15 +148,15 @@ def query(lat, lon):
         print('Longitude value must be between', -LON_MAX, 'and', LON_MAX, '. Your value:', lon)
         return
 
-
-    for no_of_records in [100, 100, 1000, 10000]:
+    no_of_records_base = 100
+    for no_of_records in [no_of_records_base, no_of_records_base*10, no_of_records_base*100]:
         print('Checking times for', no_of_records, 'number of records')
 
         point_list = generator(no_of_records)
 
-
         """ List-based searching """
         search_name =  'list'
+        print(memory_usage((list_search, (lat, lon, point_list))))
         id_list, final_time = list_search(lat, lon, point_list)
         time_dict = {search_name : final_time}
         index_dict = {search_name : id_list}
@@ -168,6 +164,7 @@ def query(lat, lon):
 
         """ Class-based searching """
         search_name =  'class'
+        print(memory_usage((class_search, (lat, lon, point_list))))
         id_list, final_time = class_search(lat, lon, point_list)
         time_dict[search_name] = final_time
         index_dict[search_name] =  id_list
@@ -176,21 +173,22 @@ def query(lat, lon):
         """ Dictionary searching """
         search_name =  'dict'
         id_list, final_time = dict_search(lat, lon, point_list)
+        print(memory_usage((dict_search, (lat, lon, point_list))))
         time_dict[search_name] = final_time
         index_dict[search_name] =  id_list
 
 
         """ Database searching """
         search_name =  'database'
+        print(memory_usage((database_search, (lat, lon, point_list))))
         id_list, final_time = database_search(lat, lon, point_list)
         time_dict[search_name] = final_time
         index_dict[search_name] =  id_list
 
-        print('Times\n', time_dict)
-        #
-        # for name in index_dict:
-        #     print(name, '\n', index_dict[name])
-
+        # print('Times\n', time_dict)
+        print(no_of_records)
+        for name in time_dict:
+            print(time_dict[name])
 
 def main():
 
