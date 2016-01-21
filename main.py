@@ -49,7 +49,7 @@ def batch_create(point_list):
 
 
 def list_search(lat, lon, point_list):
-    print('List-based searching:')
+    # print('List-based searching:')
     id_list = []
 
     curtime = time()
@@ -63,7 +63,7 @@ def list_search(lat, lon, point_list):
 
 
 def class_search(lat, lon, point_list):
-    print('\nClass-based searching:')
+    # print('\nClass-based searching:')
     id_list = []
 
     """ Insert into class """
@@ -80,62 +80,9 @@ def class_search(lat, lon, point_list):
     return id_list, final_time
 
 
-# def dict_search(lat, lon, point_list):
-#
-#
-# def database_search(lat, lon, point_list):
-
-
-
-def query(lat, lon):
-    no_of_records = 100
-
-    if lat > LAT_MAX or lat < -LAT_MAX:
-        print('Latiture value must be between', -LAT_MAX, 'and', LAT_MAX, '. Your value:', lat)
-        return
-
-    if lon > LON_MAX or lon < -LON_MAX:
-        print('Longitude value must be between', -LON_MAX, 'and', LON_MAX, '. Your value:', lon)
-        return
-
-    point_list = generator(no_of_records)
-
-
-    """ List-based searching """
-    search_name =  'list'
-    id_list, final_time = list_search(lat, lon, point_list)
-    time_dict = {search_name : final_time}
-    index_dict = {search_name : id_list}
-
-
-    """ Class-based searching """
-    search_name =  'class'
-    id_list, final_time = class_search(lat, lon, point_list)
-    time_dict[search_name] = final_time
-    index_dict[search_name] =  id_list
-
-    # counter = 0
-    # print('\nClass-based searching:')
-    # id_list_class = []
-    #
-    # """ Insert into class """
-    # point_list_class = batch_create(point_list)
-    #
-    # """ Search """
-    # curtime = time()
-    # for point in point_list_class:
-    #     if distance(lat, lon, point.lat, point.lon) <= point.r:
-    #         id_list_class.append(point.id_number)
-    #         counter += 1
-    #
-    # time_dict['class'] = time()-curtime
-    # print('Amount of points:', counter)
-
-
-    """ Dictionary searching """
-    counter = 0
-    print('\nDictionary searching:')
-    id_list_dict = []
+def dict_search(lat, lon, point_list):
+    # print('\nDictionary searching:')
+    id_list = []
 
     """ Insert into dictionary"""
     list_dict = []
@@ -147,16 +94,15 @@ def query(lat, lon):
     curtime = time()
     for point in list_dict:
         if distance(lat, lon, point['lat'], point['lon']) <= point['r']:
-            counter += 1
-            id_list_dict.append(point['id'])
+            id_list.append(point['id'])
 
-    time_dict['dict'] = time()-curtime
-    print('Amount of points:', counter)
+    final_time = time()-curtime
+
+    return id_list, final_time
 
 
-
-    """ Database searching """
-    print('\nDatabase searching:')
+def database_search(lat, lon, point_list):
+    # print('\nDatabase searching:')
 
     try:
         conn = psycopg2.connect('host=192.168.0.16 user=pgwojtek dbname=cctest password=cctestpasswd0%0')
@@ -187,17 +133,63 @@ def query(lat, lon):
     curtime = time()
     cur.execute("""select id from points where |/((%s - lat)^2 + (%s - lon)^2) <= r;""", (lat, lon))
     conn.commit()
-    rows = cur.fetchall()
+    id_list = cur.fetchall()
 
-    time_dict['database'] = time()-curtime
+    final_time =  time()-curtime
 
     cur.close()
     conn.close()
 
-    print(len(rows))
+    return id_list, final_time
 
-    print('Times\n', time_dict)
-    print('Indexes\n', index_dict)
+
+def query(lat, lon):
+    if lat > LAT_MAX or lat < -LAT_MAX:
+        print('Latiture value must be between', -LAT_MAX, 'and', LAT_MAX, '. Your value:', lat)
+        return
+
+    if lon > LON_MAX or lon < -LON_MAX:
+        print('Longitude value must be between', -LON_MAX, 'and', LON_MAX, '. Your value:', lon)
+        return
+
+
+    for no_of_records in [100, 100, 1000, 10000]:
+        print('Checking times for', no_of_records, 'number of records')
+
+        point_list = generator(no_of_records)
+
+
+        """ List-based searching """
+        search_name =  'list'
+        id_list, final_time = list_search(lat, lon, point_list)
+        time_dict = {search_name : final_time}
+        index_dict = {search_name : id_list}
+
+
+        """ Class-based searching """
+        search_name =  'class'
+        id_list, final_time = class_search(lat, lon, point_list)
+        time_dict[search_name] = final_time
+        index_dict[search_name] =  id_list
+
+
+        """ Dictionary searching """
+        search_name =  'dict'
+        id_list, final_time = dict_search(lat, lon, point_list)
+        time_dict[search_name] = final_time
+        index_dict[search_name] =  id_list
+
+
+        """ Database searching """
+        search_name =  'database'
+        id_list, final_time = database_search(lat, lon, point_list)
+        time_dict[search_name] = final_time
+        index_dict[search_name] =  id_list
+
+        print('Times\n', time_dict)
+        #
+        # for name in index_dict:
+        #     print(name, '\n', index_dict[name])
 
 
 def main():
