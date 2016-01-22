@@ -149,14 +149,15 @@ def query(lat, lon):
         return
 
     no_of_records_base = 100
-    for no_of_records in [no_of_records_base, no_of_records_base*10, no_of_records_base*100]:
+    for no_of_records in [no_of_records_base, no_of_records_base*10, no_of_records_base*100, no_of_records_base*1000,
+                          no_of_records_base*10000]:
         print('Checking times for', no_of_records, 'number of records')
 
         point_list = generator(no_of_records)
 
         """ List-based searching """
         search_name =  'list'
-        print(memory_usage((list_search, (lat, lon, point_list))))
+        # print(memory_usage((list_search, (lat, lon, point_list))))
         id_list, final_time = list_search(lat, lon, point_list)
         time_dict = {search_name : final_time}
         index_dict = {search_name : id_list}
@@ -164,31 +165,34 @@ def query(lat, lon):
 
         """ Class-based searching """
         search_name =  'class'
-        print(memory_usage((class_search, (lat, lon, point_list))))
+        # print(memory_usage((class_search, (lat, lon, point_list))))
         id_list, final_time = class_search(lat, lon, point_list)
         time_dict[search_name] = final_time
-        index_dict[search_name] =  id_list
+        index_dict[search_name] = id_list
 
 
         """ Dictionary searching """
         search_name =  'dict'
+        # print(memory_usage((dict_search, (lat, lon, point_list))))
         id_list, final_time = dict_search(lat, lon, point_list)
-        print(memory_usage((dict_search, (lat, lon, point_list))))
         time_dict[search_name] = final_time
-        index_dict[search_name] =  id_list
+        index_dict[search_name] = id_list
 
 
         """ Database searching """
         search_name =  'database'
-        print(memory_usage((database_search, (lat, lon, point_list))))
+        # print(memory_usage((database_search, (lat, lon, point_list))))
         id_list, final_time = database_search(lat, lon, point_list)
         time_dict[search_name] = final_time
-        index_dict[search_name] =  id_list
+        index_dict[search_name] = id_list
 
         # print('Times\n', time_dict)
         print(no_of_records)
         for name in time_dict:
-            print(time_dict[name])
+            print(name, time_dict[name])
+
+        # print(id_list)
+
 
 def main():
 
