@@ -157,7 +157,7 @@ def query(lat, lon):
 
         """ List-based searching """
         search_name =  'list'
-        # print(memory_usage((list_search, (lat, lon, point_list))))
+        print(memory_usage((list_search, (lat, lon, point_list))))
         id_list, final_time = list_search(lat, lon, point_list)
         time_dict = {search_name : final_time}
         index_dict = {search_name : id_list}
@@ -165,7 +165,7 @@ def query(lat, lon):
 
         """ Class-based searching """
         search_name =  'class'
-        # print(memory_usage((class_search, (lat, lon, point_list))))
+        print(memory_usage((class_search, (lat, lon, point_list))))
         id_list, final_time = class_search(lat, lon, point_list)
         time_dict[search_name] = final_time
         index_dict[search_name] = id_list
@@ -173,7 +173,7 @@ def query(lat, lon):
 
         """ Dictionary searching """
         search_name =  'dict'
-        # print(memory_usage((dict_search, (lat, lon, point_list))))
+        print(memory_usage((dict_search, (lat, lon, point_list))))
         id_list, final_time = dict_search(lat, lon, point_list)
         time_dict[search_name] = final_time
         index_dict[search_name] = id_list
@@ -181,7 +181,7 @@ def query(lat, lon):
 
         """ Database searching """
         search_name =  'database'
-        # print(memory_usage((database_search, (lat, lon, point_list))))
+        print(memory_usage((database_search, (lat, lon, point_list))))
         id_list, final_time = database_search(lat, lon, point_list)
         time_dict[search_name] = final_time
         index_dict[search_name] = id_list
